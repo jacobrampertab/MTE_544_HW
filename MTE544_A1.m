@@ -14,11 +14,11 @@ l = 0.3;
 sigma_theta = 0.1*pi()/180; sigma_xy = 0.01;
 %% Rotation inputs
 % wheel speeds: angular velocities in rad/s
-w1 = 1; w2 = -1; w3 = 0.1;
+w1 = 1; w2 = -1; w3 = -1;
 %% Initial State
 %theta: angular position of robot
 x = 0; dx = 0; y = 0; dy = 0; theta = 0; dtheta = 0;
-State = [x,y,dx,dy,theta,dtheta];
+State = [x,dx,y,dy,theta,dtheta];
 Omega = [w1,w2,w3];
 % arrays to store robot path to graph at the end
 X_graph= zeros(1,100);
@@ -32,7 +32,7 @@ Y_graph = zeros(1,100);
 for step=1:N
     time = step*t;
     %1. evaluate true state
-    State = evaluate_motion_model(State,Omega, r, l, time, sigma_theta, sigma_xy);
+    State = evaluate_motion_model(State,Omega, r, l, t, sigma_theta, sigma_xy);
     %2. evaluate measurement model based on state
     % evaluate_sensor_model(...)
     %% prediction update

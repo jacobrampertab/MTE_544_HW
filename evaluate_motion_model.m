@@ -1,6 +1,6 @@
 function current_state = evaluate_motion_model(Prev_state, Omega,r, l, T, sigma_theta, sigma_xy)
 %% Three wheel robot model kinematics 
-%  prev_state_vec = [x, y, x_dot, y_dot, theta, theta_dot]', 
+%  prev_state_vec = [x, x_dot, y, y_dot, theta, theta_dot]', 
 %  inputs = wheel speeds[wheel_1, wheel_2, wheel_3] 
 %  constants: r (wheel radius), l (robot radius), T (time step)
 %% Update Angular Velocity of Robot
@@ -31,8 +31,8 @@ ydot_global = sin(theta) * xdot_local + cos(theta)*xdot_local;
 x_disturbance = normrnd(0,sigma_xy);
 y_disturbance = normrnd(0,sigma_xy);
 % updating x-y with gaussian noise
-x = Prev_state(1); y = Prev_state(2);
+x = Prev_state(1); y = Prev_state(3);
 x_new = x + xdot_global * T + x_disturbance;
 y_new = y + ydot_global * T + y_disturbance;
 %% Return Updated State Vector
-current_state = [x_new,y_new,xdot_global,ydot_global, theta_new, thetadot];
+current_state = [x_new,xdot_global,y_new,ydot_global, theta_new, thetadot];
