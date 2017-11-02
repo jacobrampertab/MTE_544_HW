@@ -1,4 +1,4 @@
-function G_pred = evaluate_G(G, X, u, T, r)
+function G = evaluate_G(X, u, T, r)
 % X - previous state (or previous state prediction)
 % T - time step
 % r - wheel radius
@@ -15,5 +15,4 @@ G = [1, T, 0, 0,                              0, 0;
      0, 0, 0, 0,  cos(theta)*k1 - sin(theta)*k2, 0;
      0, 0, 0, 0,                              1, T;
      0, 0, 0, 0,                              0, 0;
-     ]
-G_pred = G;
+     ];
