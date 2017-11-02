@@ -55,12 +55,16 @@ for step=1:N
     %% prediction update
     % Evaluate G_matrix
     G = evaluate_G(State_calculated, Input, t, r);
-    State_prediction = evaluate_motion_model(State_calculated,Input, r, l, t, sigma_theta, sigma_xy);
-    Covariance_prediction = zeros();
     % Evaluate miu (predicted state based on previous predicted state and
     % current input; based on motion model g(x,u))
+    State_prediction = evaluate_motion_model(State_calculated,Input, r, l, t, sigma_theta, sigma_xy);
+    Covariance_prediction = zeros();
     % Evalute Sigma predicted G*Sigma_prev*transpose(G) + R ; R is
     % convariance of motion model
+    % Look at efk.m function; in order to use it, our motion/sensor model
+    % functions should be of the form evaluate_motion_model(x,u) - we can
+    % maybe hardcode values like the time step and radius, in order to use
+    % the handy efk.m function
     %% Measurement update
     %Evaluate H_matrix
     % H_pre
