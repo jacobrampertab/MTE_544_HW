@@ -12,7 +12,7 @@ r = 0.25;
 l = 0.3;
 % Guassian Disturbance:
 sigma_theta = 0.1*pi()/180; sigma_xy = 0.01;
-R = [sigma_xy 0 0 0 0 0; %covariance on x position
+R = [sigma_xy; %covariance on x position
      0 0 0 0 0 0; %no uncertainty on x velocity
      0 0 sigma_xy 0 0 0; %covariance on y position
      0 0 0 0 0 0; %no uncertainty on y velocity

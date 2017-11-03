@@ -7,12 +7,14 @@ function G = evaluate_G(X, u, T, r)
 % to be implemented
 theta = X(5);
 w1 = u(1); w2 = u(2); w3 = u(3);
-k1 = (w3-w2)*r*0.866;
-k2 = r*(w1-0.5*(w2+w3)*0.5);
-G = [1, T, 0, 0,                              0, 0;
-     0, 0, 0, 0, -sin(theta)*k1 - cos(theta)*k2, 0;
-     0, 0, 1, T,                              0, 0;
-     0, 0, 0, 0,  cos(theta)*k1 - sin(theta)*k2, 0;
-     0, 0, 0, 0,                              1, T;
-     0, 0, 0, 0,                              0, 0;
+vx = (w3-w2)*r*0.866;
+vy = r*(w1-0.5*(w2+w3)*0.5);
+     %x %x_dot %y %y_dot %theta %theta_dot
+     x_new = x_prev + T*x_dot
+G = [1, T, 0, 0,                              0, 0; %x
+     0, 0, 0, 0, -sin(theta)*vx - cos(theta)*vy, 0; %x_dot
+     0, 0, 1, T,                              0, 0; %y
+     0, 0, 0, 0,  cos(theta)*vx - sin(theta)*vy, 0; %y_dot
+     0, 0, 0, 0,                              1, T; %theta
+     0, 0, 0, 0,                              0, 0; %theta_dot
      ];
