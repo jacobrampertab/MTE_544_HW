@@ -4,14 +4,16 @@
 close all;
 
 %% Input Controls
-w1 = -1.5; % Rotation speed of wheel 1
-w2 = 2; % Rotation speed of wheel 2
-w3 = 1; % Rotation speed of wheel 3
+w1 = 5.5; % Rotation speed of wheel 1
+w2 = -5; % Rotation speed of wheel 2
+w3 = 2.25; % Rotation speed of wheel 3
 dist_off = 0; % Turn on or off disturbances
+enable_spiral = 0; % Turn on spiral drive (decrement w1)
 
-% Forward:  w1 = 0,     w2 = -1,    w3 = 1
-% Rotate:   w1 = 1,     w2 = 1,     w3 = 1
-% Spiral:   w1 = 1,     w2 = -1.5   w3 = 1.5
+% Forward:  w1 = 0,             w2 = -1,    w3 = 1
+% Rotate:   w1 = 1,             w2 = 1,     w3 = 1
+% Spiral:   w1 = 8(-0.05*t),    w2 = -3,    w3 = 3      enable_spiral = 1
+% 2m Circle w1 = 5.5,           w2 = -5,    w3 = 2.25
 
 % Time Parameters
 runtime = 15;   % seconds for simulation runtime
@@ -52,9 +54,17 @@ mot_theta = zeros(1,cycles);
 mot_x(1) = 0;
 mot_y(1) = 0;
 mot_theta(1) = 0;
+
 figure(1);
 
 for incr=2:cycles
+    if(enable_spiral)
+        w1 = w1 - 0.05;
+        mot_vx = (w3 - w2)*r*cos(alpha - pi/2);
+        mot_vy = r*w1 - (w3 + w2)*r*cos(pi - alpha);
+        mot_omega = r / l * (w1 + w2 + w3);
+    end
+
     real_delta_x = mot_vx*time_step*cos(mot_theta(incr-1)) - mot_vy*time_step*sin(mot_theta(incr-1));
     real_delta_y = mot_vx*time_step*sin(mot_theta(incr-1)) + mot_vy*time_step*cos(mot_theta(incr-1));
     

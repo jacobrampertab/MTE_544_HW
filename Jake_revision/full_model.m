@@ -9,10 +9,6 @@ w2 = 2; % Rotation speed of wheel 2
 w3 = 1; % Rotation speed of wheel 3
 dist_off = 0; % Turn on or off disturbances
 
-% Forward:  w1 = 0,     w2 = -1,    w3 = 1
-% Rotate:   w1 = 1,     w2 = 1,     w3 = 1
-% Spiral:   w1 = 1,     w2 = -1.5   w3 = 1.5
-
 % Time Parameters
 runtime = 15;   % seconds for simulation runtime
 time_step = 0.1;    % seconds for evaluation time step
@@ -93,6 +89,6 @@ for incr=2:cycles
     pause(0.05);
 end
 
-title('Motion Model for Three Wheel Robot');
+title('Motion and Measurement Model for Three Wheel Robot');
 xlabel('X Position [m]');
 ylabel('Y Position [m]');
