@@ -30,13 +30,14 @@ l = 0.3; % Distance from wheel to center
 %% Bicycle Model Commands
 % TODO 
 % [x] length: 30 cm
-% [x] gaussian disturbance on x, y position : 0.02 m std dev
-% [x] gaussian disturbance on angle theta:  1 degree std dev (0.01744)
+% [ ] gaussian disturbance on x, y position : 0.02 m std dev
+% [ ] gaussian disturbance on angle theta:  1 degree std dev 
 % [x] update interval : 0.1 s
 % [x] speed: 3 m/s
 % [x] steering angle : delta = 10 - t degrees
 % [x] steering angle limits : +/- 30 degrees (+/-0.523 rads)
 % [x] 20 seconds
+%
 
 % Speed command
 v = 3*ones(1,n); % Constant throughout
@@ -59,8 +60,8 @@ x = [0; 0; 0];
 disp('Bicycle Car Simulation')
 for t=1:n
     x(:,t+1) = bicycle(x(:,t),v(t),delta(t),l,dt);
-    noise = [normrnd(0, 0.02) ; normrnd(0, 0.02) ; normrnd(0,0.01744)];
-    x(:, t+1) =  x(:, t+1)+ noise;
+    noise = [normrand(0, 0.02) normrand(0, 0.02) normrand(0, )]
+    x(:, t+1) = 
 end
 % Create figure of motion
 figure(1);
@@ -71,7 +72,7 @@ for t=1:2:n % For every second position of the robot
     
     plot(x(1,1:t), x(2,1:t), 'bx'); % Draw the path of the vehicle
     axis equal; % Use same scale on both axes
-    axis([-15 10 -25 5]); % Set the dimensions of the plot
+    axis([-10 5 -25 5]); % Set the dimensions of the plot
     drawnow; % Draw the plot now instead of when Matlab feels like it
     if video 
         writeVideo(vidObj, getframe(gcf)); % Record the plot as a frame in the movie
