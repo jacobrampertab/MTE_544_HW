@@ -9,8 +9,9 @@ theta = X(5);
 w1 = u(1); w2 = u(2); w3 = u(3);
 vx = (w3-w2)*r*0.866;
 vy = r*(w1-0.5*(w2+w3)*0.5);
-     %x %x_dot %y %y_dot %theta %theta_dot
+     
      x_new = x_prev + T*x_dot
+     %x %x_dot %y %y_dot %theta %theta_dot
 G = [1, T, 0, 0,                              0, 0; %x
      0, 0, 0, 0, -sin(theta)*vx - cos(theta)*vy, 0; %x_dot
      0, 0, 1, T,                              0, 0; %y
