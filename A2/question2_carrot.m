@@ -1,11 +1,5 @@
-clear;clc; close all;
-% Different car models, driving around a circle. Types include:
-% Dubins - This model uses speed and angular velocity as inputs
-% TwoWheel - This model uses left and right wheel speeds as inputs
-% Bicycle - This model uses speed and steering angle as inputs, can also
-% be used for four wheel Ackermann steered vehicles (like cars)
+%% Trajectory tracking
 
-modeltype = 'Bicycle';
 video = false;
 
 %% Create AVI movie object
@@ -16,126 +10,114 @@ if video
     open(vidObj); % Open video object
 end
 
-%% Simulations
-% Time
-T = 20; % Duration
-dt = 0.1;  % Timestep
-tvec = 0:dt:T; % Time vector
-n = length(tvec); % Number of timesteps
 
-% Vehicle parameters
-l = 0.3; % Distance from wheel to center
+%% Simulation Variables
+% Fixed vehicle parameters
+velocity = 3; % Speed
+delta_max = 30*pi/180; % max steering angle
+k = 10; % Gain
+ks = -1; % Damping
+robot_length = 0.34; % Car length
+% TODO length explodes the driving trajectory below 0.34, must resolve
+r = 2; % Carrot Distance
 
-% Controller Parameters
-k = 5; % steering correction gain
+% Desired trajectory as a plot of points. The plot of points defines
+% multiple line segments all joined together. The vehicle will first follow
+% along the first line segment. After it is has driven past the length of
+% said line segment, it defines a new line segment to follow by taking the
+% next point.
+traj_points = [20,0;
+               20,5;
+               0, 5;
+               0, 0];
 
-% carrot controller
-r = 1; % track one meter ahead
+traj_point_counter = 1; % Keep track of where we are in the trajectory
+           
+% Initial conditions in [x y heading]
+x0 = [0 0 0]; 
 
-%% Bicycle Model Commands
+% Simulation time
+Tmax = 20;  % End point
+dt =0.01; % Time step
+T = 0:dt:Tmax; % Time vector
 
-% Speed command
-v = 3*ones(1,n); % Constant throughout
+% Simulation setup
+xd = zeros(length(T)-1,3); % Derivative of state ([edot psidot])
+x = zeros(length(T),3);  % State ([e psi] 
+x(1,:) = x0; % Initial condition
+delta = zeros(length(T),1); % Steering angles
 
-% Steering Angle
-delta = zeros(1,n); %in rad
 
-% Heading errors
-dHeadErr = 0;
-curHeadErr = 0;
-prevHeadErr = 0;
-
-%% Waypoints
-waypoints = [20 0; 20 5; 0 5; 0 0];
-numWayPoints = length(waypoints);
-prevWayPoint = 4;
-curWayPoint = 1;
-
-%% Body motion integration
-x = zeros(3,n);
-prev_diff = 20;
-delta_diff = 0;
-
-disp('Bicycle Car Simulation')
-for t=1:n-1
-    % TODO use r here
-    P_start = waypoints(prevWayPoint, :);
-    P_end = waypoints(curWayPoint, :);
-    P_robot = x(1:2,t)';
-    Vec1 = P_robot - P_start;
-    Vec2 = P_end - P_start;
-    Vec2_unit = Vec2/norm(Vec2);
-    Vec3 = dot(Vec1, Vec2) * Vec2_unit; 
-    P_on_line = P_start + Vec3;
-   
-    P_carrot = P_on_line + Vec2_unit .* r;
-    % if P_carrot is beyond endpoint, just use endpoint
-    diff = norm(P_end - P_on_line)
-    delta_diff = diff - prev_diff;
-    [crosstrack_error outside] = distanceToLineSegment(waypoints(prevWayPoint,:),P_carrot, x(1:2,t)');
-    if(delta_diff <= 0)
+%% Main Loop
+for i=1:length(T)-1
+    % The desired trajectory is a line segment consisting of 2 points from
+    % the desired trajectory
+    end_point = traj_points(traj_point_counter+1, :);
+    start_point = traj_points(traj_point_counter, :);
+    traj_angle = atan2(end_point(2) - start_point(2), end_point(1) - start_point(1));
+    
+    carrot_pos = calculate_carrot(start_point, end_point, x(i,1:2), r);
+    [crosstrack_error, next_point] = distanceToLineSegment(start_point,carrot_pos,x(i,1:2));
+    
+    % Calculate steering angle
+    delta(i) = max(-delta_max, min(delta_max, angleWrap(traj_angle - x(i,3))+ atan2(-k*crosstrack_error,ks+velocity)));
+    % State derivatives
+    xd(i,1) = velocity*cos(x(i,3));
+    xd(i,2) = velocity*sin(x(i,3));
+    xd(i,3) = velocity*tan(delta(i)/robot_length);
+    
+    % Noise
+    %noise = [normrnd(0, 0.02), normrnd(0, 0.02), normrnd(0,0.01744)];
+    noise = [0,0,0];
+    
+    % State update
+    x(i+1,1) = x(i,1)+dt*xd(i,1)+noise(1);
+    x(i+1,2) = x(i,2)+dt*xd(i,2)+noise(2);
+    x(i+1,3) = x(i,3)+dt*xd(i,3)+noise(3);
+    
+    % angle wrap the heading
+    x(i+1,3) = angleWrap(x(i+1,3));
+    
+ 
+    % Check if we have travelled the distance of the line segment. 
+    % If we have, then get the next point
+    if (next_point == 1)
+        traj_point_counter = traj_point_counter+1;
         disp("reached point");
-        prevWayPoint = curWayPoint;
-        curWayPoint = curWayPoint + 1;
-        if(curWayPoint > numWayPoints)
-            curWayPoint = 1;
+        if (traj_point_counter == length(traj_points(:,1)))
+            break;
         end
-        P_start = waypoints(prevWayPoint, :);
-        P_end = waypoints(curWayPoint, :);
-        P_robot = x(1:2,t)';
-        Vec1 = P_robot - P_start;
-        Vec2 = P_end - P_start;
-        Vec2_unit = Vec2/norm(Vec2);
-        Vec3 = dot(Vec1, Vec2) * Vec2_unit; 
-        P_on_line = P_start + Vec3;
-
-        P_carrot = P_on_line + Vec2_unit .* r;
-        % if P_carrot is beyond endpoint, just use endpoint
-    
-        [crosstrack_error outside] = distanceToLineSegment(waypoints(prevWayPoint,:), P_carrot, x(1:2,t)');
-        dHeadErr = 0;
-        curHeadErr = -pi()/2;
-        prevHeadErr = 0;
-        delta(t+1) = -pi()/2;
-    else
-        dHeadErr = -v(t+1)*sin(delta(t))/l;
-        prevHeadErr = curHeadErr;
-        curHeadErr = prevHeadErr + dHeadErr*dt;
-        delta(t+1) = curHeadErr + atan(k*crosstrack_error/v(t+1));
     end
-    
-    if(delta(t+1) > 0.523)
-        delta(t+1) = 0.523;
-    end
-    if(delta(t+1) < -0.523)
-        delta(t+1) = -0.523;
-    end 
-
-    prev_diff = diff;
-    % Update next state
-    x(:,t+1) = bicycle(x(:,t),v(t),delta(t+1),l,dt);
-    %noise = [normrnd(0, 0.02) ; normrnd(0, 0.02) ; normrnd(0,0.01744)];
-    %x(:,t+1) =  x(:,t+1)+ noise;
-    
 end
 
 
-%% Create figure of motion
-figure(1);
-for t=1:2:n % For every second position of the robot
-    clf;hold on; % clear the current figure
+%% Plotting
+% Plotting the trajectory of the vehicle
+figure(1);clf; hold on;
+plot(x(1:i,1),x(1:i,2),'b-');
+scatter(traj_points(:,1), traj_points(:,2),10,'r');
+
+for t=1:30:i
+      drawbox(x(t,1),x(t,2),-x(t,3),.5,1);
+end
+xlabel('x (m)')
+ylabel('y (m)')
+axis equal
+hold off;
+
+% Alternative trajectory plotting
+figure(2); hold on;
+for t=1:60:i % For every second position of the robot
+    drawcar(x(t,1),x(t,2),x(t,3),delta(t),0.1,2); % Draw the car
     
-    drawcar(x(1,t),x(2,t),x(3,t),delta(t),0.1,1); % Draw the car
-    
-    plot(x(1,1:t), x(2,1:t), 'bx'); % Draw the path of the vehicle
+    plot(x(1:t,1), x(1:t,2), 'bx'); % Draw the path of the vehicle
     axis equal; % Use same scale on both axes
-    %axis([-15 10 -25 5]); % Set the dimensions of the plot
     drawnow; % Draw the plot now instead of when Matlab feels like it
     if video 
         writeVideo(vidObj, getframe(gcf)); % Record the plot as a frame in the movie
     end
 end
 
-if video
-    close(vidObj); % Finish making the movie file
-end
+
+
+
