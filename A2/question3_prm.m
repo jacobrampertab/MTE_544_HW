@@ -53,7 +53,9 @@ nS = 200;
 samples = [xR(1)*rand(nS,1)+xMin(1) xR(2)*rand(nS,1)+xMin(2)];
 
 milestones = zeros(size(samples));
-count = 0;
+milestones(1, :) = x0/dxy;
+milestones(2, :) = xF/dxy;
+count = 2;
 % CHECK if point falls w/n obstacle
 for i=1:length(samples)
     x_index = round(samples(i,1));
@@ -66,6 +68,7 @@ for i=1:length(samples)
     end
 end
 
+milestones = milestones(1:count, :);
 
 figure(1); hold on;
 plot(samples(:,1),samples(:,2),'k.');
@@ -90,7 +93,7 @@ for i = 1:nM
     for j=1:p
         cur = ind(j);
         if (i<cur)
-            if (~CheckCollision(milestones(i,:),milestones(cur,:), obsEdges))
+            if (~checkCollisionsOG(milestones(i,:),milestones(cur,:), map))
                 e(i,cur) = 1;
                 e(cur,i) = 1;
                 plot([milestones(i,1) milestones(cur,1)],[milestones(i,2) milestones(cur,2)],'m');
