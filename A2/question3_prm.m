@@ -37,7 +37,7 @@ axis equal
 
 % Set up the map
 xMax = [M N]; % State bounds
-xMin = [0 0];
+xMin = [1 1];
 xR = xMax-xMin;
 
 % Set up the goals
