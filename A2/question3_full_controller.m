@@ -15,9 +15,9 @@ end
 % Fixed vehicle parameters
 velocity = 3; % Speed
 delta_max = 30*pi/180; % max steering angle
-k = 10; % Gain
+k = 25; % Gain
 ks = -1; % Damping
-robot_length = 3; % Car length
+robot_length = 1; % Car length
 % TODO length explodes the driving trajectory below 0.34, must resolve
 r = 2; % Carrot Distance
 
@@ -35,7 +35,7 @@ dxy = 0.1;
 
 startnode = [40 5 pi];
 endnode = [50 10 0];
-traj_points = prm(map, startnode, endnode, 500)*0.1;
+% traj_points = prm(map, startnode, endnode, 600)*0.1;
 % traj_points = [20,0;
 %                20,5;
 %                0, 5;
@@ -67,8 +67,7 @@ while(i<20000)
     start_point = traj_points(traj_point_counter, :);
     traj_angle = atan2(end_point(2) - start_point(2), end_point(1) - start_point(1));
     
-    carrot_pos = calculate_carrot(start_point, end_point, x(i,1:2), r);
-    [crosstrack_error, next_point] = distanceToLineSegment(start_point,carrot_pos,x(i,1:2));
+    [crosstrack_error, next_point] = distanceToLineSegment(start_point,end_point,x(i,1:2));
     
     % Calculate steering angle
     delta(i) = max(-delta_max, min(delta_max, angleWrap(traj_angle - x(i,3))+ atan2(-k*crosstrack_error,ks+velocity)));
@@ -111,7 +110,7 @@ end
 figure(2);clf; hold on;
 colormap('gray');
 imagesc(1-map');
-plot(x(1:i,1)/dxy,x(1:i,2)/dxy,'b-');
+plot(x(1:i,1)/dxy,x(1:i,2)/dxy,'g-');
 scatter(traj_points(:,1)/dxy, traj_points(:,2)/dxy,10,'r');
 
 xlabel('x (m)')
