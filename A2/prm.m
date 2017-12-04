@@ -1,28 +1,16 @@
-%% TODO
-% [X] generate occupancy grid from IGVCmap.m
-% [X] modify problem parameters to use occ_grid dimensions
-% [X] convert inpolygon() functoin (check if point is in occupied tile)
-% [X] convert CheckCollision() function (check edge for collision)
-% [X] change plotting code to use occupancy grid
-% [X] remove unnecessary polygon related code
+function path = prm(map, startpos, searchgoal, nS)
 
 %% Probabilistic Road Map example - batch form
-clear; clc;
-
-%% Planning map
 
 
-I = imread('IGVCmap.jpg');
-map = im2bw(I, 0.7); % Convert to 0-1 image
-map = 1-flipud(map)'; % Convert to 0 free, 1 occupied and flip.
 [M,N]= size(map); % Map size
 
 % Robot start position
 dxy = 0.1;
-startpos = [40 5 pi];
+%startpos = [40 5 pi];
 
 % Target location
-searchgoal = [50 10];
+%searchgoal = [50 10];
 
 % Plotting
 figure(1); clf; hold on;
@@ -42,14 +30,14 @@ xR = xMax-xMin;
 
 % Set up the goals
 x0 = startpos(1:2);
-xF = searchgoal;
+xF = searchgoal(1:2);
 % toc;
 
 %% Multi-query PRM, created in batch
 %tic;
 
 % Get milestones
-nS = 200;
+%nS = 200;
 samples = [xR(1)*rand(nS,1)+xMin(1) xR(2)*rand(nS,1)+xMin(2)];
 
 milestones = zeros(size(samples));
@@ -112,3 +100,5 @@ disp('Time to find shortest path');
 for i=1:length(sp)-1
     plot(milestones(sp(i:i+1),1),milestones(sp(i:i+1),2), 'go-', 'LineWidth',3);
 end
+
+path = milestones(sp,:);

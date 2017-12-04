@@ -4,8 +4,7 @@
 % [X] convert inpolygon() functoin (check if point is in occupied tile)
 % [X] convert CheckCollision() function (check edge for collision)
 % [X] change plotting code to use occupancy grid
-% [X] remove unnecessary polygon related code
-
+% [X] remove unnecessary polygon related code 
 %% Probabilistic Road Map example - batch form
 clear; clc;
 
